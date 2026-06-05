@@ -29,8 +29,24 @@ async function run() {
         app.post('/api/jobs', async (req, res) => {
             const jobData = req.body;
             const jobResult = await jobCollection.insertOne(jobData);
-            res.json(jobResult);
-        })
+            res.send(jobResult);
+        });
+
+        app.get('/api/jobs', async (req, res) => {
+            const query = {};
+
+            if (req.query.companyId) {
+                query.companyId = req.query.companyId;
+            }
+
+            if (req.query.status) {
+                query.status = req.query.status;
+            }
+
+            const cursor = jobCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        });
 
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
