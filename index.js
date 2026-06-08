@@ -27,9 +27,16 @@ async function run() {
         const jobCollection = db.collection('jobs');
         const companyCollection = db.collection('companies');
 
+        // job related APIs
         app.post('/api/jobs', async (req, res) => {
             const jobData = req.body;
-            const jobResult = await jobCollection.insertOne(jobData);
+
+            const newJob = {
+                ...jobData,
+                createdAt: new Date()
+            }
+
+            const jobResult = await jobCollection.insertOne(newJob);
             res.send(jobResult);
         });
 
@@ -50,10 +57,15 @@ async function run() {
         });
 
         // company related APIs
-
         app.post('/api/companies', async (req, res) => {
             const company = req.body;
-            const result = await companyCollection.insertOne(company);
+
+            const newCompany = {
+                ...company,
+                createdAt: new Date()
+            }
+
+            const result = await companyCollection.insertOne(newCompany);
             res.send(result);
         });
 
