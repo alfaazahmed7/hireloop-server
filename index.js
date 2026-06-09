@@ -26,6 +26,14 @@ async function run() {
         const db = client.db('hireloop');
         const jobCollection = db.collection('jobs');
         const companyCollection = db.collection('companies');
+        const userCollection = db.collection('user');
+
+        // user APIs
+        app.get('/api/users', async (req, res) => {
+            const cursor = userCollection.find().skip(10);
+            const result = await cursor.toArray();
+            res.send(result);
+        });
 
         // job related APIs
         app.post('/api/jobs', async (req, res) => {
@@ -57,6 +65,12 @@ async function run() {
         });
 
         // company related APIs
+        app.get('/api/companies', async (req, res) => {
+            const cursor = companyCollection.find().skip(8);
+            const result = await cursor.toArray();
+            res.send(result);
+        });
+
         app.post('/api/companies', async (req, res) => {
             const company = req.body;
 
@@ -77,7 +91,13 @@ async function run() {
             }
 
             const result = await companyCollection.findOne(query);
-            res.send(result);
+            console.log('my companies', result);
+
+            if (!result) {
+                return res.status(404).json({ error: "No company found for this recruiter ID" });
+            }
+
+            res.json(result);
         });
 
         await client.db("admin").command({ ping: 1 });
