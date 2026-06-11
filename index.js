@@ -27,6 +27,7 @@ async function run() {
         const jobCollection = db.collection('jobs');
         const companyCollection = db.collection('companies');
         const userCollection = db.collection('user');
+        const applicationsCollection = db.collection('applications');
 
         // user APIs
         app.get('/api/users', async (req, res) => {
@@ -107,6 +108,18 @@ async function run() {
             }
 
             res.json(result);
+        });
+
+        // application related APIs
+
+        app.post('/api/applications', async (req, res) => {
+            const application = req.body;
+            const newApplication = {
+                ...application,
+                createdAt: new Date()
+            }
+            const result = await applicationsCollection.insertOne(newApplication);
+            res.send(result);
         });
 
         await client.db("admin").command({ ping: 1 });
