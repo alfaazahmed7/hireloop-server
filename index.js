@@ -29,6 +29,7 @@ async function run() {
         const userCollection = db.collection('user');
         const applicationsCollection = db.collection('applications');
         const plansCollection = db.collection('plans');
+        const subscriptionCollection = db.collection('subscriptions');
 
         // user APIs
         app.get('/api/users', async (req, res) => {
@@ -141,7 +142,7 @@ async function run() {
                 res.send(result);
 
             }
-             catch (error) {
+            catch (error) {
                 res.status(500).send({ message: "Error fetching applications", error });
             }
         });
@@ -164,6 +165,30 @@ async function run() {
             } catch (error) {
                 res.status(500).send({ message: "Server error", error });
             }
+        });
+
+        // subscription related APIs
+
+        app.post('/api/subscriptions', async (req, res) => {
+            const data = req.body;
+            const subsInfo = {
+                ...data,
+                createdAt: new Date()
+            }
+            const result = await subscriptionCollection.insertOne(subsInfo);
+
+            // update the user plan info
+            const filter = { email: data.email };
+
+            // update the value of the 'quantity' field to 5
+            const updateDocument = {
+                $set: {
+                    plan: data.planId
+                },
+            };
+
+            const updateResult = await userCollection.updateOne(filter, updateDocument);
+            res.send(updateResult);
         });
 
         await client.db("admin").command({ ping: 1 });
