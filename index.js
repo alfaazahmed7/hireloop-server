@@ -28,6 +28,7 @@ async function run() {
         const companyCollection = db.collection('companies');
         const userCollection = db.collection('user');
         const applicationsCollection = db.collection('applications');
+        const plansCollection = db.collection('plans');
 
         // user APIs
         app.get('/api/users', async (req, res) => {
@@ -123,19 +124,46 @@ async function run() {
         });
 
         app.get('/api/applications', async (req, res) => {
+            try {
+                const query = {};
+
+                // Check for applicantId (passed by getApplicationByApplicant)
+                if (req.query.applicantId) {
+                    query.applicantId = req.query.applicantId;
+                }
+
+                if (req.query.jobId) {
+                    query.jobId = req.query.jobId;
+                }
+
+                const cursor = applicationsCollection.find(query);
+                const result = await cursor.toArray();
+                res.send(result);
+
+            }
+             catch (error) {
+                res.status(500).send({ message: "Error fetching applications", error });
+            }
+        });
+
+        // plans related APIs
+
+        app.get('/api/plans', async (req, res) => {
             const query = {};
 
-            if (req.query.applicationId) {
-                req.query = req.query.applicationId;
+            if (req.query.plan_id) {
+                query.planId = req.query.plan_id;
             }
 
-            if (req.query.jobId) {
-                req.query = req.query.jobId;
+            try {
+                const plan = await plansCollection.findOne(query);
+                if (!plan) {
+                    return res.status(404).send({ message: "Plan not found" });
+                }
+                res.send(plan);
+            } catch (error) {
+                res.status(500).send({ message: "Server error", error });
             }
-
-            const cursor = applicationsCollection.find(query);
-            const result = await cursor.toArray();
-            res.send(result);
         });
 
         await client.db("admin").command({ ping: 1 });
